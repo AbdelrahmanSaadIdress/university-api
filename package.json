@@ -4,7 +4,7 @@
   "description": "Faculty Management API using Express and MongoDB",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "Abdo Saad",
