@@ -4,10 +4,11 @@ require('dotenv').config();
 
 const connectDB = async () => {
   const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/faculty_management';
+  console.log('🧩 Connecting to MongoDB URI:', uri); // <-- ADD THIS LINE
 
   try {
     await mongoose.connect(uri);
-    console.log(`✅ MongoDB connected → ${uri.includes('mongodb+srv') ? 'Atlas Cloud' : 'Localhost'}`);
+    console.log(`✅ MongoDB connected successfully`);
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
     process.exit(1);
