@@ -8,16 +8,12 @@ const StudentSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
-    first_name: {
+    full_name: {
         type: String,
         required: [true, 'First name is required'],
         trim: true
     },
-    last_name: {
-        type: String,
-        required: [true, 'Last name is required'],
-        trim: true
-    },
+    
     email: {
         type: String,
         required: [true, 'Email is required'],
@@ -52,6 +48,11 @@ const StudentSchema = new mongoose.Schema({
         default: 'Active'
     },
     password: {
+        type: String,
+        required: [true, 'Password is required'],
+        minlength: [8, 'Password must be at least 8 characters long'],
+    },
+    confirm_password: {
         type: String,
         required: [true, 'Password is required'],
         minlength: [8, 'Password must be at least 8 characters long'],

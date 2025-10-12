@@ -26,8 +26,7 @@ async function seedStudents() {
         const hashedPassword = await bcrypt.hash(`password${i}`, salt);
         students.push({
             student_id: `STU${1000 + i}`,
-            first_name: `Student${i}`,
-            last_name: `Example${i}`,
+            full_name: `Student${i} Example${i}`,
             email: `student${i}@university.edu`,
             phone: `+201000000${(100 + i).toString().slice(-3)}`,
             gender: i % 2 === 0 ? 'Male' : 'Female',
@@ -35,7 +34,9 @@ async function seedStudents() {
             department_id: departments[i % departments.length],
             address: `City ${i}, Street ${i}`,
             enrollment_status: 'Active',
-            password: hashedPassword
+            password: hashedPassword,
+            confirm_password: hashedPassword
+
         });
     }
 
