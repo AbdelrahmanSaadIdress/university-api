@@ -12,6 +12,7 @@ router.get('/', async (req, res) => {
     }
 });
 
+
 // 🟢 GET student by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -54,7 +55,11 @@ router.delete('/:id', async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
-});
+})
+
+
+
+
 
 module.exports = router;
 
