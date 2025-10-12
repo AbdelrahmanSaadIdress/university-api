@@ -55,7 +55,6 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: [8, 'Password must be at least 8 characters long'],
-        select: false // Hide password in queries by default
     },
     created_at: {
         type: Date,

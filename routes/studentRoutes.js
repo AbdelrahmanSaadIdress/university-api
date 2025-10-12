@@ -57,6 +57,20 @@ router.delete('/:id', async (req, res) => {
     }
 })
 
+// 🧹 DELETE all students
+router.delete('/', async (req, res) => {
+    try {
+        const result = await Student.deleteMany({}); // removes ALL documents
+        res.json({
+        message: `All students deleted successfully`,
+        deletedCount: result.deletedCount
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
 
 
 
