@@ -246,3 +246,7 @@ router.post("/reset-password/:token", async (req, res) => {
         res.status(500).json({ message: "Server error, please try again later." });
     }
 });
+
+
+
+module.exports = router;
