@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
 // 🟢 POST signup (register new student)
 router.post('/signup', async (req, res) => {
     try {
-        const { first_name, last_name, email, password, department_id } = req.body;
+        const { full_name, email, password, confirm_password, department_id } = req.body;
 
         // 1️⃣ Check if email already exists
         const existingStudent = await Student.findOne({ email });
@@ -62,15 +62,15 @@ router.post('/signup', async (req, res) => {
 
         // 2️⃣ Auto-generate unique student_id
         const randomNum = Math.floor(1000 + Math.random() * 9000); // 4-digit number
-        const student_id = `${first_name.substring(0,3).toUpperCase()}${randomNum}`;
+        const student_id = `${full_name.substring(0,3).toUpperCase()}${randomNum}`;
 
         // 3️⃣ Create new student
         const newStudent = new Student({
             student_id,
-            first_name,
-            last_name,
+            full_name,
             email,
             password,  // will be hashed automatically
+            confirm_password,
             department_id,
             enrollment_status: 'Active'
         });
@@ -82,8 +82,7 @@ router.post('/signup', async (req, res) => {
             student: {
                 id: newStudent._id,
                 student_id: newStudent.student_id,
-                first_name: newStudent.first_name,
-                last_name: newStudent.last_name,
+                full_name: newStudent.first_name,
                 email: newStudent.email,
                 department_id: newStudent.department_id,
                 enrollment_status: newStudent.enrollment_status
