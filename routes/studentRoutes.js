@@ -204,10 +204,20 @@ router.post("/forgot-password", async (req, res) => {
 router.post("/reset-password/:token", async (req, res) => {
     try {
         const { token } = req.params;
-        const { newPassword } = req.body;
+        const { newPassword, confirmPassword } = req.body;
 
+        // 1️⃣ Validate input
+        if (!newPassword || !confirmPassword) {
+        return res.status(400).json({ message: "Please provide both newPassword and confirmPassword." });
+        }
+        if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match." });
+        }
+
+        // 2️⃣ Hash token to find user
         const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
+        // 3️⃣ Find student with matching token and non-expired time
         const student = await Student.findOne({
         resetPasswordToken: hashedToken,
         resetPasswordExpires: { $gt: Date.now() },
@@ -217,21 +227,22 @@ router.post("/reset-password/:token", async (req, res) => {
         return res.status(400).json({ message: "Invalid or expired reset token." });
         }
 
+        // 4️⃣ Hash new password
         const salt = await bcrypt.genSalt(10);
-        student.password = await bcrypt.hash(newPassword, salt);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        student.resetPasswordToken = null;
-        student.resetPasswordExpires = null;
+        student.password = hashedPassword;
+        student.confirm_password = hashedPassword;
+
+        // 5️⃣ Remove token fields
+        student.resetPasswordToken = undefined;
+        student.resetPasswordExpires = undefined;
 
         await student.save();
 
         res.json({ message: "Password has been reset successfully." });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Reset Password Error:", err);
+        res.status(500).json({ message: "Server error, please try again later." });
     }
 });
-
-
-
-module.exports = router;
-
