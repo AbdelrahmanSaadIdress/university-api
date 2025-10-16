@@ -54,7 +54,7 @@ router.post('/signup', async (req, res) => {
     try {
         const { full_name, email, password, confirm_password, department_id } = req.body;
 
-        // 1️⃣ Check if email already exists
+        // 1️⃣ Check if email alraaeady exists
         const existingStudent = await Student.findOne({ email });
         if (existingStudent) {
             return res.status(400).json({ message: 'Email already registered' });
