@@ -61,8 +61,8 @@ const StudentSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    resetPasswordToken: String,
-    resetPasswordExpires: Date
+    resetToken: String,
+    resetTokenExpire: Date,
 });
 
 // Hash password before saving
