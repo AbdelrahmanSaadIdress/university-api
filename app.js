@@ -11,8 +11,21 @@ connectDB();
 
 // 2️⃣ Middleware
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://university-api-production-d7e3.up.railway.app"
+];
 
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 // 3️⃣ Routes
 const studentRoutes = require('./routes/studentRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');

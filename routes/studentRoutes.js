@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const Student = require('../models/Student');
 
 const crypto = require("crypto");
@@ -21,34 +22,40 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // 1️⃣ Check if student exists
         const student = await Student.findOne({ email });
         if (!student) {
-            return res.status(404).json({ message: 'No account found with this email' });
+        return res.status(404).json({ message: 'No account found with this email' });
         }
 
-        // 2️⃣ Compare passwords
         const isMatch = await student.comparePassword(password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+        return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // 3️⃣ Return basic info (without password)
+        // 🔑 Create JWT Token
+        const token = jwt.sign(
+        { id: student._id, email: student.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+        );
+
         res.json({
-            message: 'Login successful',
-            student: {
-                id: student._id,
-                first_name: student.first_name,
-                last_name: student.last_name,
-                email: student.email,
-                department: student.department_id,
-                enrollment_status: student.enrollment_status,
-            }
+        message: 'Login successful',
+        student: {
+            id: student._id,
+            full_name: student.full_name,
+            email: student.email,
+            department: student.department_id,
+            enrollment_status: student.enrollment_status,
+        },
+        token,
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
+
+
 // 🟢 POST signup (register new student)
 router.post('/signup', async (req, res) => {
     try {
@@ -82,7 +89,7 @@ router.post('/signup', async (req, res) => {
             student: {
                 id: newStudent._id,
                 student_id: newStudent.student_id,
-                full_name: newStudent.first_name,
+                full_name: newStudent.full_name,
                 email: newStudent.email,
                 department_id: newStudent.department_id,
                 enrollment_status: newStudent.enrollment_status
@@ -158,47 +165,34 @@ router.delete('/', async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
     try {
         const { email } = req.body;
-
         const student = await Student.findOne({ email });
+
         if (!student) {
-        return res.status(404).json({ message: "No account found with that email." });
+        return res.status(404).json({ message: "Student not found" });
         }
 
-        // Generate a reset token
         const resetToken = crypto.randomBytes(32).toString("hex");
-        const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-
-        student.resetPasswordToken = hashedToken;
-        student.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        student.resetToken = resetToken;
+        student.resetTokenExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
         await student.save();
 
-        // Create the reset link for the frontend
         const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
-        // Send an email with the link
         const html = `
-        <div style="font-family: Arial, sans-serif; color: #333;">
-            <h2>Password Reset Request</h2>
-            <p>Hello ${student.first_name || "Student"},</p>
-            <p>We received a request to reset your password.</p>
-            <p>Click the button below to set a new password (link expires in 10 minutes):</p>
-            <a href="${resetLink}" 
-            style="display:inline-block; padding:10px 20px; color:#fff; background-color:#007BFF;
-                    border-radius:5px; text-decoration:none;">Reset Password</a>
-            <p>If you didn’t request this, you can ignore this email.</p>
-        </div>
+        <h2>Password Reset Request</h2>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetLink}" target="_blank">${resetLink}</a>
+        <p>This link will expire in 15 minutes.</p>
         `;
 
         await sendEmail(student.email, "Password Reset Request", html);
 
-        res.json({ message: "Password reset link sent to your email." });
-    } catch (err) {
-        console.error("Forgot Password Error:", err);
-        res.status(500).json({ message: "Server error, please try again later." });
+        res.json({ message: "Reset link sent to your email." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong" });
     }
-
-
 });
+
 
 // 🟢 POST /api/students/reset-password/:token
 router.post("/reset-password/:token", async (req, res) => {
