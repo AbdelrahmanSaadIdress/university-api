@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Student = require('./models/Student'); // adjust the path if needed
 
+
+console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
 const uri = 'mongodb://127.0.0.1:27017/faculty_management';
 
 const departments = [
